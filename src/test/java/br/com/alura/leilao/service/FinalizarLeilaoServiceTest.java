@@ -14,6 +14,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
@@ -54,6 +55,17 @@ class FinalizarLeilaoServiceTest {
 		Lance lanceVencedor = leilao.getLanceVencedor();
 
 		verify(enviadorDeEmails, times(1)).enviarEmailVencedorLeilao(lanceVencedor);
+	}
+
+	@Test
+	void naoDeveEnviarEmailCasoUmaExcecaoSejaLancada() {
+		List<Leilao> leiloes = leiloes();
+
+		when(leilaoDao.buscarLeiloesExpirados()).thenReturn(leiloes);
+		when(leilaoDao.salvar(any())).thenThrow(RuntimeException.class);
+
+		assertThrows(RuntimeException.class, () -> service.finalizarLeiloesExpirados());
+		verifyNoInteractions(enviadorDeEmails);
 	}
 	
 	private List<Leilao> leiloes() {
