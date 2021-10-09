@@ -1,23 +1,21 @@
 package br.com.alura.leilao.service;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.*;
-
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-
+import br.com.alura.leilao.dao.LeilaoDao;
+import br.com.alura.leilao.model.Lance;
+import br.com.alura.leilao.model.Leilao;
+import br.com.alura.leilao.model.Usuario;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import br.com.alura.leilao.dao.LeilaoDao;
-import br.com.alura.leilao.model.Lance;
-import br.com.alura.leilao.model.Leilao;
-import br.com.alura.leilao.model.Usuario;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class FinalizarLeilaoServiceTest {
@@ -43,6 +41,19 @@ class FinalizarLeilaoServiceTest {
 		service.finalizarLeiloesExpirados();
 
 		assertTrue(leilao.isFechado());
+	}
+
+	@Test
+	void deveEnviarEmailParaVencedorDoLeilao() {
+		List<Leilao> leiloes = leiloes();
+
+		when(leilaoDao.buscarLeiloesExpirados()).thenReturn(leiloes);
+		Leilao leilao = leiloes.get(0);
+		when(leilaoDao.salvar(any())).thenReturn(leilao);
+		service.finalizarLeiloesExpirados();
+		Lance lanceVencedor = leilao.getLanceVencedor();
+
+		verify(enviadorDeEmails, times(1)).enviarEmailVencedorLeilao(lanceVencedor);
 	}
 	
 	private List<Leilao> leiloes() {
