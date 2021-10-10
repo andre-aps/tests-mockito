@@ -28,7 +28,7 @@ class FinalizarLeilaoServiceTest {
 	EnviadorDeEmails enviadorDeEmails;
 	
 	@InjectMocks
-	FinalizarLeilaoService service;
+	FinalizarLeilaoService finalizarLeilaoService;
 
 	@Test
 	void deveFinalizarUmLeilao() {
@@ -39,7 +39,7 @@ class FinalizarLeilaoServiceTest {
 
 		when(leilaoDao.salvar(any())).thenReturn(leilao);
 
-		service.finalizarLeiloesExpirados();
+		finalizarLeilaoService.finalizarLeiloesExpirados();
 
 		assertTrue(leilao.isFechado());
 	}
@@ -51,7 +51,7 @@ class FinalizarLeilaoServiceTest {
 		when(leilaoDao.buscarLeiloesExpirados()).thenReturn(leiloes);
 		Leilao leilao = leiloes.get(0);
 		when(leilaoDao.salvar(any())).thenReturn(leilao);
-		service.finalizarLeiloesExpirados();
+		finalizarLeilaoService.finalizarLeiloesExpirados();
 		Lance lanceVencedor = leilao.getLanceVencedor();
 
 		verify(enviadorDeEmails, times(1)).enviarEmailVencedorLeilao(lanceVencedor);
@@ -64,7 +64,7 @@ class FinalizarLeilaoServiceTest {
 		when(leilaoDao.buscarLeiloesExpirados()).thenReturn(leiloes);
 		when(leilaoDao.salvar(any())).thenThrow(RuntimeException.class);
 
-		assertThrows(RuntimeException.class, () -> service.finalizarLeiloesExpirados());
+		assertThrows(RuntimeException.class, () -> finalizarLeilaoService.finalizarLeiloesExpirados());
 		verifyNoInteractions(enviadorDeEmails);
 	}
 	
